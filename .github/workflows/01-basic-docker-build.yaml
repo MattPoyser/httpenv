@@ -24,4 +24,4 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: ${{ github.event_name != 'pull_request' }}
-          tags: hedg03/dockercourse:latest,hedgy03/dockercourse:01
+          tags: hedgy03/dockercourse:latest,hedgy03/dockercourse:01

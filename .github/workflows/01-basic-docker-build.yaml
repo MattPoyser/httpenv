@@ -27,6 +27,5 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: hedgy03/dockercourse:latest,hedgy03/dockercourse:01
 
-	
           cache-from: type=gha
           cache-to: type=gha,mode=max

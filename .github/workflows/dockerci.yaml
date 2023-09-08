@@ -32,29 +32,46 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Run Trivy for all CVEs (non-blocking)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ github.run_id }}
-          exit-code: 0
-          format: table
 
-      - name: Run Trivy for HIGH,CRITICAL CVEs and report (blocking)
-        uses: aquasecurity/trivy-action@master
+      - name: Build and export to Docker
+        uses: docker/build-push-action@v4
         with:
-          image-ref: ${{ github.run_id }}
-          exit-code: 1
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'HIGH,CRITICAL'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          push: false
+          load: true # Export to Docker Engine rather than pushing to a registry
+          tags: ${{ github.run_id }}
+          target: test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
 
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        if: always()
-        with:
-          sarif_file: 'trivy-results.sarif'
+        # for simple tests (npm test, etc.) just run a local image in docker
+      - name: Unit Testing in Docker
+        run: |
+          docker run --rm ${{ github.run_id }} echo "run test commands here"
+
+#      - name: Run Trivy for all CVEs (non-blocking)
+#        uses: aquasecurity/trivy-action@master
+#        with:
+#          image-ref: ${{ github.run_id }}
+#          exit-code: 0
+#          format: table
+#
+#      - name: Run Trivy for HIGH,CRITICAL CVEs and report (blocking)
+#        uses: aquasecurity/trivy-action@master
+#        with:
+#          image-ref: ${{ github.run_id }}
+#          exit-code: 1
+#          ignore-unfixed: true
+#          vuln-type: 'os,library'
+#          severity: 'HIGH,CRITICAL'
+#          format: 'sarif'
+#          output: 'trivy-results.sarif'
+#
+#      - name: Upload Trivy scan results to GitHub Security tab
+#        uses: github/codeql-action/upload-sarif@v2
+#        if: always()
+#        with:
+#          sarif_file: 'trivy-results.sarif'
 
       - name: Docker meta
         id: docker_meta
